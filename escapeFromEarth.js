@@ -3,12 +3,11 @@
  *
  * This script performs the following steps:
  * 1. Initiates the mission by calling the RIS's /start endpoint with our student email.
- * 2. Retrieves data from the Solar System API (using Pluto as an example).
- * 3. Processes the retrieved data (extracts Pluto's mean radius) to compute a unique skeleton key.
+ * 2. Retrieves data from the Solar System API (using the Sun as an example).
+ * 3. Processes the retrieved data (extracts Sun 's mean radius) to compute a unique skeleton key.
  * 4. Submits the computed key to the RIS's /answer endpoint.
  * 5. Saves the skeleton key in a file named skeletonkey.txt.
  *
- * Each step is commented to clearly show the reasoning and work behind the process.
  */
 
 const fetch = require('node-fetch');
@@ -27,25 +26,30 @@ async function startChallenge() {
     }
     const startData = await startResponse.json();
     console.log('Response from /start:', startData);
-
-    const plutoUrl = 'https://api.le-systeme-solaire.net/rest/bodies/pluton';
-    console.log(`Fetching data from Solar System API: ${plutoUrl}`);
+ 
+    const sunUrl = 'https://api.le-systeme-solaire.net/rest/bodies/soleil';
+    console.log(`Fetching data for the Sun: ${sunUrl}`);
     
-    const plutoResponse = await fetch(plutoUrl);
-    if (!plutoResponse.ok) {
-      throw new Error(`Solar System API error: ${plutoResponse.statusText}`);
+    const sunResponse = await fetch(sunUrl);
+    if (!sunResponse.ok) {
+      throw new Error(`Solar System API (Sun) error: ${sunResponse.statusText}`);
+    }
+    const sunData = await sunResponse.json();
+    console.log('Sun data:', sunData);
+
+    const equaRadius = sunData.equaRadius;
+    const meanRadius = sunData.meanRadius;
+
+    if (typeof equaRadius !== 'number' || typeof meanRadius !== 'number') {
+      throw new Error('Could not find valid radius data for the Sun.');
     }
 
-    const plutoData = await plutoResponse.json();
-    console.log('Pluto data:', plutoData);
+    const difference = Math.abs(equaRadius - meanRadius);
 
-    const meanRadius = plutoData.meanRadius;
-    if (!meanRadius) {
-      throw new Error('Mean radius not found in Pluto data.');
-    }
-    
-    const skeletonKey = `${playerEmail}_${meanRadius}`;
-    console.log('Computed skeleton key:', skeletonKey);
+    console.log(`Equatorial Radius = ${equaRadius}, Mean Radius = ${meanRadius}`);
+    console.log(`Computed difference (access pin) = ${difference}`);
+
+    const skeletonKey = difference;
 
     const answerUrl = 'https://spacescavanger.onrender.com/answer';
     console.log(`Submitting key to: ${answerUrl}`);
@@ -67,7 +71,7 @@ async function startChallenge() {
     const answerData = await answerResponse.json();
     console.log('Response from /answer:', answerData);
 
-    fs.writeFileSync('skeletonkey.txt', skeletonKey);
+    fs.writeFileSync('skeletonkey.txt', skeletonKey.toString());
     console.log('Skeleton key saved to skeletonkey.txt');
 
   } catch (error) {
