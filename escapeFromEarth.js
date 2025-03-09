@@ -8,7 +8,6 @@
  * 4. Submits the computed key to the RIS's /answer endpoint.
  * 5. Saves the skeleton key in a file named skeletonkey.txt.
  *
- * Each step is commented to clearly show the reasoning and work behind the process.
  */
 
 const fetch = require('node-fetch');
