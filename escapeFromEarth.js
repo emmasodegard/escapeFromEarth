@@ -179,4 +179,31 @@ async function submitAnswer(answerValue) {
   return await res.json();
 }
 
+/**
+ * Puzzle #4: "Find how many moons Jupiter has."
+ */
+async function solvePuzzle4() {
+    console.log('\n--- Puzzle #4: Jupiter’s Moons ---\n');
+  
+    const jupiterUrl = 'https://api.le-systeme-solaire.net/rest/bodies/jupiter';
+    console.log(`Fetching Jupiter data: ${jupiterUrl}`);
+    const jupiterRes = await fetch(jupiterUrl);
+    if (!jupiterRes.ok) {
+      throw new Error(`Solar System API (Jupiter) error: ${jupiterRes.statusText}`);
+    }
+    const jupiterData = await jupiterRes.json();
+  
+    const moonsArray = jupiterData.moons || [];
+    const numberOfMoons = moonsArray.length;
+    console.log(`Puzzle #4: Jupiter has ${numberOfMoons} known moons.`);
+  
+    const puzzle4AnswerData = await submitAnswer(numberOfMoons);
+    console.log('Response from /answer (Puzzle #4):', puzzle4AnswerData);
+  
+    fs.writeFileSync('skeletonkey.txt', numberOfMoons.toString());
+    console.log(`Puzzle #4 key saved to skeletonkey.txt: ${numberOfMoons}`);
+  
+    return puzzle4AnswerData;
+  }
+  
 startChallenge();
