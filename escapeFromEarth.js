@@ -212,7 +212,77 @@ async function solvePuzzle4() {
     fs.writeFileSync('skeletonkey.txt', numberOfMoons.toString());
     console.log(`Puzzle #4 key saved to skeletonkey.txt: ${numberOfMoons}`);
   
+    if (puzzle4AnswerData.nextChallenge) {
+      console.log('\nNext Challenge:', puzzle4AnswerData.nextChallenge);
+  
+      const puzzle5Text = puzzle4AnswerData.nextChallenge.toLowerCase();
+      if (puzzle5Text.includes('largest moon')) {
+        await solvePuzzle5();
+      } else {
+        console.log('\nA different puzzle was returned after Puzzle #4. Implement if needed.\n');
+      }
+    }
+  
     return puzzle4AnswerData;
+  }
+  
+  
+  /**
+ * Puzzle #5: "Find the largest moon of Jupiter."
+ */
+async function solvePuzzle5() {
+    try {
+      console.log('\n--- Puzzle #5: Largest Moon of Jupiter ---\n');
+  
+      const jupiterUrl = 'https://api.le-systeme-solaire.net/rest/bodies/jupiter';
+      console.log(`Fetching Jupiter data: ${jupiterUrl}`);
+      const jupiterRes = await fetch(jupiterUrl);
+      if (!jupiterRes.ok) {
+        throw new Error(`Solar System API (Jupiter) error: ${jupiterRes.statusText}`);
+      }
+      const jupiterData = await jupiterRes.json();
+  
+      const moonsArray = jupiterData.moons || [];
+      if (moonsArray.length === 0) {
+        throw new Error('Jupiter has no moons array according to the API (unexpected).');
+      }
+  
+      let largestMoonName = null;
+      let largestMoonRadius = -Infinity;
+  
+      for (const moonObj of moonsArray) {
+        const moonName = moonObj.moon;
+        const moonUrl = moonObj.rel;
+  
+        const moonRes = await fetch(moonUrl);
+        if (!moonRes.ok) {
+          throw new Error(`Error fetching moon data for ${moonName}: ${moonRes.statusText}`);
+        }
+        const moonData = await moonRes.json();
+  
+        const radius = moonData.meanRadius || 0;
+        if (radius > largestMoonRadius) {
+          largestMoonRadius = radius;
+          largestMoonName = moonData.englishName || moonName;
+        }
+      }
+  
+      console.log(`Largest moon: ${largestMoonName}, radius = ${largestMoonRadius}`);
+  
+      const puzzle5AnswerData = await submitAnswer(largestMoonName);
+      console.log('Response from /answer (Puzzle #5):', puzzle5AnswerData);
+  
+      fs.writeFileSync('skeletonkey.txt', largestMoonName);
+      console.log(`Puzzle #5 key saved to skeletonkey.txt: ${largestMoonName}`);
+  
+      if (puzzle5AnswerData.nextChallenge) {
+        console.log('\nNext Challenge:', puzzle5AnswerData.nextChallenge);
+      }
+  
+      return puzzle5AnswerData;
+    } catch (error) {
+      console.error('An error occurred in solvePuzzle5():', error);
+    }
   }
   
 startChallenge();
