@@ -161,8 +161,17 @@ async function solvePuzzle3() {
 
   if (answerData.nextChallenge) {
     console.log('\nNext Challenge:', answerData.nextChallenge);
+  
+    const puzzle4Text = answerData.nextChallenge.toLowerCase();
+    if (puzzle4Text.includes('moons')) {
+      await solvePuzzle4();
+    } else {
+      console.log('\nA different puzzle was returned after Puzzle #3. Implement more logic if needed.\n');
+    }
   }
+  
   return answerData;
+  
 }
 
 async function submitAnswer(answerValue) {
