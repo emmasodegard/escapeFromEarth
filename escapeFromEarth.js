@@ -227,7 +227,7 @@ async function solvePuzzle4() {
   }
   
   
-  /**
+/**
  * Puzzle #5: "Find the largest moon of Jupiter."
  */
 async function solvePuzzle5() {
@@ -277,6 +277,13 @@ async function solvePuzzle5() {
   
       if (puzzle5AnswerData.nextChallenge) {
         console.log('\nNext Challenge:', puzzle5AnswerData.nextChallenge);
+  
+        const puzzle6Text = puzzle5AnswerData.nextChallenge.toLowerCase();
+        if (puzzle6Text.includes('classification')) {
+          await solvePuzzle6();
+        } else {
+          console.log('\nA different puzzle was returned after Puzzle #5. Implement if needed.\n');
+        }
       }
   
       return puzzle5AnswerData;
@@ -285,4 +292,39 @@ async function solvePuzzle5() {
     }
   }
   
-startChallenge();
+  /**
+   * Puzzle #6: "Find Pluto’s classification."
+   */
+  async function solvePuzzle6() {
+    try {
+      console.log('\n--- Puzzle #6: Pluto’s Classification ---\n');
+  
+      const plutoUrl = 'https://api.le-systeme-solaire.net/rest/bodies/pluton';
+      console.log(`Fetching Pluto data: ${plutoUrl}`);
+      const plutoRes = await fetch(plutoUrl);
+      if (!plutoRes.ok) {
+        throw new Error(`Solar System API (Pluto) error: ${plutoRes.statusText}`);
+      }
+      const plutoData = await plutoRes.json();
+  
+      const classification = plutoData.bodyType;
+      console.log(`Puzzle #6: Pluto's classification is "${classification}".`);
+  
+      const puzzle6AnswerData = await submitAnswer(classification);
+      console.log('Response from /answer (Puzzle #6):', puzzle6AnswerData);
+  
+      fs.writeFileSync('skeletonkey.txt', classification);
+      console.log(`Puzzle #6 key saved to skeletonkey.txt: ${classification}`);
+  
+      if (puzzle6AnswerData.nextChallenge) {
+        console.log('\nNext Challenge:', puzzle6AnswerData.nextChallenge);
+      }
+  
+      return puzzle6AnswerData;
+    } catch (error) {
+      console.error('An error occurred in solvePuzzle6():', error);
+    }
+  }
+  
+  startChallenge();
+  
